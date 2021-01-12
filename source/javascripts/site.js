@@ -71,14 +71,7 @@ function appleEated() {
 function accelerateSnake() {
   interval -= 5;
   clearInterval(setIntervale);
-  setIntervale = setInterval(function() {
-    moveSnake();
-    if (appleEated()) {
-      enlargeSnake();
-      generateNewApple();
-      accelerateSnake();
-    }
-  }, interval);
+  setIntervale = setInterval(mainFunction, interval);
 }
 
 function handleButtonPressed(event) {
@@ -94,17 +87,31 @@ function handleButtonPressed(event) {
 }
 
 function eatHimself() {
-  let hashX = {};
-  let hashY = {};
-  snake.forEach(element => {
-    hashX[element.x] = (hashX[element.x] || 0) + 1;
-    hashY[element.y] = (hashY[element.y] || 0) + 1;
-    if ((hashX[element.x] >= 2) && (hashY[element.y] >= 2)) {
-      console.log("mordu!!!!");
+  let snakeHead = [...snake][snake.length - 1];
+  let snakeBody = [...snake];
+  snakeBody.splice(snake.length - 1, 1);
+  let repetition = 0;
+  snakeBody.forEach(element => {
+    if ((snakeHead.x === element.x) && (snakeHead.y === element.y)) {
+      repetition++;
     }
   })
+  if (repetition > 0) {
+    return true;
+  }
 }
 
+function mainFunction() {
+  moveSnake();
+  if (appleEated()) {
+    enlargeSnake();
+    generateNewApple();
+    accelerateSnake();
+  }
+  if (eatHimself()) {
+    generateAlert();
+  }
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     snakeboard = document.getElementById("snakeboard");
@@ -114,17 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function start() {
       drawSnake();
       drawApple();
-      setIntervale = setInterval(function() {
-        moveSnake();
-        if (appleEated()) {
-          enlargeSnake();
-          generateNewApple();
-          accelerateSnake();
-        }
-        if (eatHimself()) {
-          generateAlert();
-        }
-      }, interval);
+      setIntervale = setInterval(mainFunction, interval);
     }
 
     document.addEventListener('keydown', handleButtonPressed);
