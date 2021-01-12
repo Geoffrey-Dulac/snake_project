@@ -2,13 +2,14 @@
 let canvas;
 let snakeboard_ctx;
 let snakeboard;
-let snake = [  {x: 200, y: 200},  {x: 190, y: 200},  {x: 180, y: 200},  {x: 170, y: 200},  {x: 160, y: 200},];
-let dx = 10;
-let dy = 0;
-const board_border = 'black';
-const board_background = "white";
+let snake = [{x: 0, y: 50}, {x: 10, y: 50}, {x: 20, y: 50}, {x: 30, y: 50}, {x: 40, y: 50}];
+let apple = {x: 50, y: 300};
+let interval = 200;
+let setIntervale;
+let direction = "r";
 const snake_col = 'lightblue';
 const snake_border = 'darkblue';
+const apple_color = 'red';
 
 function drawSnakePart(snakePart) {
   snakeboard_ctx.fillStyle = snake_col;
@@ -18,43 +19,115 @@ function drawSnakePart(snakePart) {
 }
 
 function drawSnake() {
-  snake.forEach(drawSnakePart)
+  snake.forEach(drawSnakePart);
 }
 
-function clearCanvas() {
-  snakeboard_ctx.fillStyle = board_background;
-  snakeboard_ctx.strokestyle = board_border;
-  snakeboard_ctx.fillRect(0, 0, snakeboard.width, snakeboard.height);
-  snakeboard_ctx.strokeRect(0, 0, snakeboard.width, snakeboard.height);
+function generateNewApple() {
+  let randomX = Math.floor(Math.random() * Math.floor(390));
+  let randomY = Math.floor(Math.random() * Math.floor(390));
+  randomX -= parseInt(randomX.toString().split('').pop());
+  randomY -= parseInt(randomY.toString().split('').pop());
+  apple = {x: randomX, y: randomY};
 }
 
-function move_snake() {  
-  const head = {x: snake[0].x + dx, y: snake[0].y};
-  snake.unshift(head);
-  snake.pop();
+function drawApple() {
+  snakeboard_ctx.fillStyle = apple_color;
+  snakeboard_ctx.fillRect(apple.x, apple.y, 10, 10);
 }
+
+function enlargeSnake() {
+  if (direction === "r") {
+    snake.push({x: (snake[snake.length - 1].x + 10) ,y: (snake[snake.length - 1].y)});
+  } else if (direction === "b") {
+    snake.push({x: (snake[snake.length - 1].x) ,y: (snake[snake.length - 1].y + 10)});
+  } else if (direction === "l") {
+    snake.push({x: (snake[snake.length - 1].x - 10) ,y: (snake[snake.length - 1].y)});
+  } else if (direction === "u") {
+    snake.push({x: (snake[snake.length - 1].x) ,y: (snake[snake.length - 1].y - 10)});
+  }
+}
+
+function generateAlert() {
+  if(!alert('LLOOOOSSSEEERRRR !')){window.location.reload();};
+}
+
+function moveSnake() {
+  snakeboard_ctx.clearRect(0, 0, canvas.width, canvas.height);
+  snake.shift();
+  enlargeSnake();
+  Object.values(snake[snake.length - 1]).forEach(element => {
+    if (element >= 400 || element < 0) {
+      generateAlert();
+    }
+  })
+  drawSnake();
+  drawApple();
+}
+
+function appleEated() {
+  return snake[snake.length - 1].x == apple.x && snake[snake.length - 1].y == apple.y
+}
+
+function accelerateSnake() {
+  interval -= 5;
+  clearInterval(setIntervale);
+  setIntervale = setInterval(function() {
+    moveSnake();
+    if (appleEated()) {
+      enlargeSnake();
+      generateNewApple();
+      accelerateSnake();
+    }
+  }, interval);
+}
+
+function handleButtonPressed(event) {
+  if (event.key === "ArrowRight") {
+    direction = "r";
+  } else if (event.key === "ArrowDown") {
+    direction = "b";
+  } else if (event.key === "ArrowLeft") {
+    direction = "l";
+  } else if (event.key === "ArrowUp") {
+    direction = "u";
+  }
+}
+
+function eatHimself() {
+  let hashX = {};
+  let hashY = {};
+  snake.forEach(element => {
+    hashX[element.x] = (hashX[element.x] || 0) + 1;
+    hashY[element.y] = (hashY[element.y] || 0) + 1;
+    if ((hashX[element.x] >= 2) && (hashY[element.y] >= 2)) {
+      console.log("mordu!!!!");
+    }
+  })
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
-    canvas = document.getElementById("snakeboard");
     snakeboard = document.getElementById("snakeboard");
     snakeboard_ctx = snakeboard.getContext("2d");
+    canvas = document.querySelector("#snakeboard");
 
-
-    snake.forEach(drawSnakePart);
-    
     function start() {
-        setTimeout(function onTick() {
-            clearCanvas();
-            move_snake();
-            drawSnake();
-            // Call main again
-            start();
-        }, 100)
+      drawSnake();
+      drawApple();
+      setIntervale = setInterval(function() {
+        moveSnake();
+        if (appleEated()) {
+          enlargeSnake();
+          generateNewApple();
+          accelerateSnake();
+        }
+        if (eatHimself()) {
+          generateAlert();
+        }
+      }, interval);
     }
 
-    start();
+    document.addEventListener('keydown', handleButtonPressed);
 
-    setInterval(function() {
-        move_snake();
-    },1000)
+    start();
 })
