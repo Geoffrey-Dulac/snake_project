@@ -1,11 +1,19 @@
-html {
-  background-color: grey;
+h2, h3 {
+  font-family: 'Press Start 2P', cursive;
+}
+
+.main-container {
+  background-color: black;
+  height: 100vh;
 }
 
 #snakeboard {
-  background-color: white;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  background-color: #ba8ced;
+  border: solid #53285d 10px;
+}
+
+// UTILITIES
+
+.outline-none {
+  outline: none !important;
 }

@@ -1,4 +1,3 @@
-// This is where it all goes :)
 let canvas;
 let snakeboard_ctx;
 let snakeboard;
@@ -7,9 +6,12 @@ let apple = {x: 50, y: 300};
 let interval = 200;
 let setIntervale;
 let direction = "r";
-const snake_col = 'lightblue';
-const snake_border = 'darkblue';
-const apple_color = 'red';
+const snake_col = '#7dd40d';
+const snake_border = '#599705';
+const apple_color = '#f91100';
+let startButton;
+let scoreNumber = 0;
+let score;
 
 function drawSnakePart(snakePart) {
   snakeboard_ctx.fillStyle = snake_col;
@@ -101,30 +103,43 @@ function eatHimself() {
   }
 }
 
+function scorePlusTwenty() {
+  scoreNumber += 20;
+  updateScreenScore();
+}
+
 function mainFunction() {
   moveSnake();
   if (appleEated()) {
     enlargeSnake();
     generateNewApple();
     accelerateSnake();
+    scorePlusTwenty();
   }
   if (eatHimself()) {
     generateAlert();
   }
 }
 
+function updateScreenScore() {
+  score.innerText = scoreNumber;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     snakeboard = document.getElementById("snakeboard");
     snakeboard_ctx = snakeboard.getContext("2d");
     canvas = document.querySelector("#snakeboard");
+    startButton = document.getElementById("start-btn");
+    score = document.getElementById("score");
 
     function start() {
       drawSnake();
       drawApple();
+      startButton.disabled = true;
       setIntervale = setInterval(mainFunction, interval);
     }
 
+    updateScreenScore();
     document.addEventListener('keydown', handleButtonPressed);
-
-    start();
+    startButton.addEventListener("click", start);
 })
