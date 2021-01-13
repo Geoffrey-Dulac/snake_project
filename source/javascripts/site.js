@@ -164,7 +164,7 @@ function bonusAppear() {
 }
 
 function drawBonus() {
-  snakeboard_ctx.fillStyle = "green";
+  snakeboard_ctx.fillStyle = "#FFD700";
   snakeboard_ctx.fillRect(bonus.x, bonus.y, 10, 10);
 }
 
