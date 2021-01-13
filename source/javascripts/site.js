@@ -1,7 +1,7 @@
 let canvas;
 let snakeboard_ctx;
 let snakeboard;
-let snake = [{x: 0, y: 50}, {x: 10, y: 50}, {x: 20, y: 50}, {x: 30, y: 50}, {x: 40, y: 50}];
+let snake = [{x: 40, y: 50}, {x: 30, y: 50}, {x: 20, y: 50}, {x: 10, y: 50}, {x: 0, y: 50}];
 let apple = {x: 50, y: 300};
 let interval = 200;
 let setIntervale;
@@ -12,6 +12,7 @@ const apple_color = '#f91100';
 let startButton;
 let scoreNumber = 0;
 let score;
+let bonus = {x: "", y: ""};
 
 function drawSnakePart(snakePart) {
   snakeboard_ctx.fillStyle = snake_col;
@@ -39,13 +40,13 @@ function drawApple() {
 
 function enlargeSnake() {
   if (direction === "r") {
-    snake.push({x: (snake[snake.length - 1].x + 10) ,y: (snake[snake.length - 1].y)});
-  } else if (direction === "b") {
-    snake.push({x: (snake[snake.length - 1].x) ,y: (snake[snake.length - 1].y + 10)});
-  } else if (direction === "l") {
     snake.push({x: (snake[snake.length - 1].x - 10) ,y: (snake[snake.length - 1].y)});
-  } else if (direction === "u") {
+  } else if (direction === "b") {
     snake.push({x: (snake[snake.length - 1].x) ,y: (snake[snake.length - 1].y - 10)});
+  } else if (direction === "l") {
+    snake.push({x: (snake[snake.length - 1].x + 10) ,y: (snake[snake.length - 1].y)});
+  } else if (direction === "u") {
+    snake.push({x: (snake[snake.length - 1].x) ,y: (snake[snake.length - 1].y + 10)});
   }
 }
 
@@ -55,23 +56,38 @@ function generateAlert() {
 
 function moveSnake() {
   snakeboard_ctx.clearRect(0, 0, canvas.width, canvas.height);
-  snake.shift();
-  enlargeSnake();
-  Object.values(snake[snake.length - 1]).forEach(element => {
+  snake.pop();
+  if (direction === "r") {
+    snake.splice(0, 0, {x: (snake[0].x + 10) ,y: (snake[0].y)});
+  } else if (direction === "b") {
+    snake.splice(0, 0, {x: (snake[0].x) ,y: (snake[0].y + 10)});
+  } else if (direction === "l") {
+    snake.splice(0, 0, {x: (snake[0].x - 10) ,y: (snake[0].y)});
+  } else if (direction === "u") {
+    snake.splice(0, 0, {x: (snake[0].x) ,y: (snake[0].y - 10)});
+  }
+  Object.values(snake[0]).forEach(element => {
     if (element >= 400 || element < 0) {
       generateAlert();
     }
   })
   drawSnake();
   drawApple();
+  if (bonus.x !== "") {
+    drawBonus();
+  }
 }
 
 function appleEated() {
-  return snake[snake.length - 1].x == apple.x && snake[snake.length - 1].y == apple.y
+  return snake[0].x == apple.x && snake[0].y == apple.y
+}
+
+function bonusEated() {
+  return snake[0].x == bonus.x && snake[0].y == bonus.y
 }
 
 function accelerateSnake() {
-  interval -= 5;
+  interval -= 4;
   clearInterval(setIntervale);
   setIntervale = setInterval(mainFunction, interval);
 }
@@ -89,9 +105,9 @@ function handleButtonPressed(event) {
 }
 
 function eatHimself() {
-  let snakeHead = [...snake][snake.length - 1];
+  let snakeHead = [...snake][0];
   let snakeBody = [...snake];
-  snakeBody.splice(snake.length - 1, 1);
+  snakeBody.splice(0, 1);
   let repetition = 0;
   snakeBody.forEach(element => {
     if ((snakeHead.x === element.x) && (snakeHead.y === element.y)) {
@@ -108,13 +124,24 @@ function scorePlusTwenty() {
   updateScreenScore();
 }
 
+function scorePlusThirtyFive() {
+  scoreNumber += 35;
+  updateScreenScore();
+}
+
 function mainFunction() {
   moveSnake();
   if (appleEated()) {
     enlargeSnake();
+    enlargeSnake();
     generateNewApple();
     accelerateSnake();
     scorePlusTwenty();
+  }
+  if (bonusEated()) {
+    scorePlusThirtyFive();
+    bonus = {x: "", y: ""};
+    window.requestAnimationFrame;
   }
   if (eatHimself()) {
     generateAlert();
@@ -125,6 +152,22 @@ function updateScreenScore() {
   score.innerText = scoreNumber;
 }
 
+function bonusAppear() {
+  let randomX = Math.floor(Math.random() * Math.floor(390));
+  let randomY = Math.floor(Math.random() * Math.floor(390));
+  randomX -= parseInt(randomX.toString().split('').pop());
+  randomY -= parseInt(randomY.toString().split('').pop());
+  bonus = {x: randomX, y: randomY};
+  setTimeout(function() {
+    bonus = {x: "", y: ""};
+  }, 7000)
+}
+
+function drawBonus() {
+  snakeboard_ctx.fillStyle = "green";
+  snakeboard_ctx.fillRect(bonus.x, bonus.y, 10, 10);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     snakeboard = document.getElementById("snakeboard");
     snakeboard_ctx = snakeboard.getContext("2d");
@@ -133,10 +176,14 @@ document.addEventListener("DOMContentLoaded", function () {
     score = document.getElementById("score");
 
     function start() {
+      document.querySelector(".scoreZone").classList.add("text-white");
       drawSnake();
       drawApple();
       startButton.disabled = true;
       setIntervale = setInterval(mainFunction, interval);
+      setInterval(() => {
+        bonusAppear();
+      }, 20000);
     }
 
     updateScreenScore();
