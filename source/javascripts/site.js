@@ -25,6 +25,16 @@ function drawSnake() {
   snake.forEach(drawSnakePart);
 }
 
+function drawApple() {
+  snakeboard_ctx.fillStyle = apple_color;
+  snakeboard_ctx.fillRect(apple.x, apple.y, 10, 10);
+}
+
+function drawBonus() {
+  snakeboard_ctx.fillStyle = "#FFD700";
+  snakeboard_ctx.fillRect(bonus.x, bonus.y, 10, 10);
+}
+
 function generateNewApple() {
   let randomX = Math.floor(Math.random() * Math.floor(390));
   let randomY = Math.floor(Math.random() * Math.floor(390));
@@ -33,9 +43,68 @@ function generateNewApple() {
   apple = {x: randomX, y: randomY};
 }
 
-function drawApple() {
-  snakeboard_ctx.fillStyle = apple_color;
-  snakeboard_ctx.fillRect(apple.x, apple.y, 10, 10);
+function generateBonus() {
+  let randomX = Math.floor(Math.random() * Math.floor(390));
+  let randomY = Math.floor(Math.random() * Math.floor(390));
+  randomX -= parseInt(randomX.toString().split('').pop());
+  randomY -= parseInt(randomY.toString().split('').pop());
+  bonus = {x: randomX, y: randomY};
+  setTimeout(function() {
+    bonus = {x: "", y: ""};
+  }, 7000)
+}
+
+function generateAlert() {
+  if(!alert('LLOOOOSSSEEERRRR !')){window.location.reload();};
+}
+
+function scorePlusTwenty() {
+  scoreNumber += 20;
+  updateScreenScore();
+}
+
+function scorePlusThirtyFive() {
+  scoreNumber += 35;
+  updateScreenScore();
+}
+
+function updateScreenScore() {
+  score.innerText = scoreNumber;
+}
+
+function appleEated() {
+  return snake[0].x == apple.x && snake[0].y == apple.y
+}
+
+function bonusEated() {
+  return snake[0].x == bonus.x && snake[0].y == bonus.y
+}
+
+function eatHimself() {
+  let snakeHead = [...snake][0];
+  let snakeBody = [...snake];
+  snakeBody.splice(0, 1);
+  let repetition = 0;
+  snakeBody.forEach(element => {
+    if ((snakeHead.x === element.x) && (snakeHead.y === element.y)) {
+      repetition++;
+    }
+  })
+  if (repetition > 0) {
+    return true;
+  }
+}
+
+function handleButtonPressed(event) {
+  if (event.key === "ArrowRight") {
+    direction = "r";
+  } else if (event.key === "ArrowDown") {
+    direction = "b";
+  } else if (event.key === "ArrowLeft") {
+    direction = "l";
+  } else if (event.key === "ArrowUp") {
+    direction = "u";
+  }
 }
 
 function enlargeSnake() {
@@ -48,10 +117,6 @@ function enlargeSnake() {
   } else if (direction === "u") {
     snake.push({x: (snake[snake.length - 1].x) ,y: (snake[snake.length - 1].y + 10)});
   }
-}
-
-function generateAlert() {
-  if(!alert('LLOOOOSSSEEERRRR !')){window.location.reload();};
 }
 
 function moveSnake() {
@@ -78,58 +143,13 @@ function moveSnake() {
   }
 }
 
-function appleEated() {
-  return snake[0].x == apple.x && snake[0].y == apple.y
-}
-
-function bonusEated() {
-  return snake[0].x == bonus.x && snake[0].y == bonus.y
-}
-
 function accelerateSnake() {
   interval -= 4;
   clearInterval(setIntervale);
-  setIntervale = setInterval(mainFunction, interval);
+  setIntervale = setInterval(gameRunning, interval);
 }
 
-function handleButtonPressed(event) {
-  if (event.key === "ArrowRight") {
-    direction = "r";
-  } else if (event.key === "ArrowDown") {
-    direction = "b";
-  } else if (event.key === "ArrowLeft") {
-    direction = "l";
-  } else if (event.key === "ArrowUp") {
-    direction = "u";
-  }
-}
-
-function eatHimself() {
-  let snakeHead = [...snake][0];
-  let snakeBody = [...snake];
-  snakeBody.splice(0, 1);
-  let repetition = 0;
-  snakeBody.forEach(element => {
-    if ((snakeHead.x === element.x) && (snakeHead.y === element.y)) {
-      repetition++;
-    }
-  })
-  if (repetition > 0) {
-    return true;
-  }
-}
-
-function scorePlusTwenty() {
-  scoreNumber += 20;
-  updateScreenScore();
-}
-
-function scorePlusThirtyFive() {
-  scoreNumber += 35;
-  updateScreenScore();
-}
-
-function mainFunction() {
+function gameRunning() {
   moveSnake();
   if (appleEated()) {
     enlargeSnake();
@@ -141,31 +161,10 @@ function mainFunction() {
   if (bonusEated()) {
     scorePlusThirtyFive();
     bonus = {x: "", y: ""};
-    window.requestAnimationFrame;
   }
   if (eatHimself()) {
     generateAlert();
   }
-}
-
-function updateScreenScore() {
-  score.innerText = scoreNumber;
-}
-
-function bonusAppear() {
-  let randomX = Math.floor(Math.random() * Math.floor(390));
-  let randomY = Math.floor(Math.random() * Math.floor(390));
-  randomX -= parseInt(randomX.toString().split('').pop());
-  randomY -= parseInt(randomY.toString().split('').pop());
-  bonus = {x: randomX, y: randomY};
-  setTimeout(function() {
-    bonus = {x: "", y: ""};
-  }, 7000)
-}
-
-function drawBonus() {
-  snakeboard_ctx.fillStyle = "#FFD700";
-  snakeboard_ctx.fillRect(bonus.x, bonus.y, 10, 10);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -177,16 +176,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function start() {
       document.querySelector(".scoreZone").classList.add("text-white");
+      startButton.disabled = true;
       drawSnake();
       drawApple();
-      startButton.disabled = true;
-      setIntervale = setInterval(mainFunction, interval);
-      setInterval(() => {
-        bonusAppear();
-      }, 20000);
+      setIntervale = setInterval(gameRunning, interval);
+      setInterval(generateBonus, 20000);
     }
 
-    updateScreenScore();
     document.addEventListener('keydown', handleButtonPressed);
     startButton.addEventListener("click", start);
 })
