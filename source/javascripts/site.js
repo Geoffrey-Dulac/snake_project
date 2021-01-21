@@ -97,13 +97,13 @@ function eatHimself() {
 
 function handleButtonPressed(event) {
   if (event.key === "ArrowRight") {
-    direction = "r";
+    direction === "l" ? direction = "l" : direction = "r";
   } else if (event.key === "ArrowDown") {
-    direction = "b";
+    direction === "u" ? direction = "u" : direction = "b";
   } else if (event.key === "ArrowLeft") {
-    direction = "l";
+    direction === "r" ? direction = "r" : direction = "l";
   } else if (event.key === "ArrowUp") {
-    direction = "u";
+    direction === "b" ? direction = "b" : direction = "u";
   }
 }
 
