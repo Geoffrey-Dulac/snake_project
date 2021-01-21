@@ -7,4 +7,8 @@ I used Middleman framework that i really appreciate for static websites and i de
 <strong>Meet me and play at : https://snake-js-training.herokuapp.com/</strong>
 
 
-<h2>Features to come !</h2>
+<h2>Features to come :</h2>
+
+<p>- Timeout visible when bonus appear<br>
+- Full ranking to see who's the best :)<br>
+- Create differents levels of difficulty</p>
