@@ -5,6 +5,9 @@
 I used Middleman framework that i really appreciate for static websites and i deployed with Heroku.</p>
 
 <strong>Meet me and play at : https://snake-js-training.herokuapp.com/</strong>
+<br>
+<br>
+<i>January 2021</i>
 
 
 <h2>Features to come :</h2>
